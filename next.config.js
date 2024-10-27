@@ -1,9 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  output: 'export',  // This is important for static export
   images: {
-    domains: ['oaidalleapiprodscus.blob.core.windows.net'], // For OpenAI images
+    unoptimized: true
   },
+  distDir: 'out'
 }
 
 module.exports = nextConfig
