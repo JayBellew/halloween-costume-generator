@@ -4,11 +4,13 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Check if we have the API key
     if (!process.env.OPENAI_API_KEY) {
+      console.log('API key missing!');
       throw new Error('OpenAI API key not configured');
     }
 
-    console.log('Generating image for prompt:', req.body.prompt); // Add logging
+    console.log('Got prompt:', req.body.prompt);
 
     const response = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
@@ -26,13 +28,15 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error?.message || 'Image generation failed');
+      console.error('OpenAI API error:', error);
+      throw new Error(error.error?.message || 'OpenAI API error');
     }
 
     const data = await response.json();
+    console.log('Got image URL from OpenAI');
     res.status(200).json({ imageUrl: data.data[0].url });
   } catch (error) {
-    console.error('Error generating image:', error); // Add logging
+    console.error('Server error:', error);
     res.status(500).json({ error: error.message });
   }
 }
