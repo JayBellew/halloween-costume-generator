@@ -1,9 +1,9 @@
-import { HalloweenCostumeGenerator } from '../components/HalloweenCostumeGenerator';
+import { HalloweenCostumeGenerator } from '@/components/HalloweenCostumeGenerator';
 
 export default function Home() {
   return (
-    <div>
+    <main>
       <HalloweenCostumeGenerator />
-    </div>
+    </main>
   );
 }
