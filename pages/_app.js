@@ -1,5 +1,11 @@
-import '@/styles/globals.css'
+import '@/styles/globals.css';
 
-export default function App({ Component, pageProps }) {
-  return <Component {...pageProps} />
+function MyApp({ Component, pageProps }) {
+  return (
+    <div suppressHydrationWarning>
+      {typeof window === 'undefined' ? null : <Component {...pageProps} />}
+    </div>
+  );
 }
+
+export default MyApp;
