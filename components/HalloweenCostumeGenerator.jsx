@@ -6,36 +6,73 @@ export function HalloweenCostumeGenerator() {
   const [costume, setCostume] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [imageUrl, setImageUrl] = useState(null);
+  const [error, setError] = useState(null);
 
   const adjectives = [
-    'Spooky', 'Mysterious', 'Enchanted', 'Cursed', 'Glowing'
+    'Spooky', 'Mysterious', 'Enchanted', 'Cursed', 'Glowing', 'Ancient',
+    'Haunted', 'Magical', 'Cosmic', 'Undead', 'Spectral', 'Whimsical',
+    'Infernal', 'Celestial', 'Mythical', 'Eldritch'
   ];
 
   const characters = [
-    'Wizard', 'Vampire', 'Ghost', 'Witch', 'Zombie'
+    'Wizard', 'Vampire', 'Ghost', 'Witch', 'Zombie', 'Werewolf',
+    'Pirate', 'Ninja', 'Robot', 'Alien', 'Dragon', 'Mummy',
+    'Demon', 'Angel', 'Cryptid', 'Phantom', 'Sorcerer', 'Reaper'
   ];
 
   const accessories = [
     'with a crystal ball', 'carrying a magical staff', 'wearing a cursed amulet',
-    'riding a broomstick', 'wielding ancient scrolls'
+    'riding a broomstick', 'wielding ancient scrolls', 'with glowing eyes',
+    'covered in cobwebs', 'surrounded by bats', 'with mystical runes',
+    'holding a jack-o-lantern', 'wrapped in chains', 'with floating candles'
   ];
 
-  const generateCostume = () => {
+  const generateCostume = async () => {
     setIsGenerating(true);
+    setError(null);
     
-    const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
-    const randomCharacter = characters[Math.floor(Math.random() * characters.length)];
-    const randomAccessory = accessories[Math.floor(Math.random() * accessories.length)];
-    
-    setCostume({
-      adjective: randomAdjective,
-      character: randomCharacter,
-      accessory: randomAccessory
-    });
+    try {
+      const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+      const randomCharacter = characters[Math.floor(Math.random() * characters.length)];
+      const randomAccessory = accessories[Math.floor(Math.random() * accessories.length)];
+      
+      const newCostume = {
+        adjective: randomAdjective,
+        character: randomCharacter,
+        accessory: randomAccessory
+      };
+      
+      setCostume(newCostume);
 
-    // For testing, use a placeholder image
-    setImageUrl('/api/placeholder/400/400');
-    setIsGenerating(false);
+      // Generate the prompt for the image
+      const prompt = `A Halloween costume concept art of a ${randomAdjective.toLowerCase()} ${randomCharacter.toLowerCase()} ${randomAccessory}, digital art style, dramatic lighting, spooky atmosphere`;
+
+      console.log('Generating image with prompt:', prompt);
+
+      // Call the API to generate the image
+      const response = await fetch('/api/generate-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate image');
+      }
+
+      const data = await response.json();
+      console.log('Received image URL:', data.imageUrl);
+      setImageUrl(data.imageUrl);
+    } catch (error) {
+      console.error('Error:', error);
+      setError(error.message);
+      setImageUrl(null);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -58,7 +95,9 @@ export function HalloweenCostumeGenerator() {
             >
               {isGenerating ? (
                 <>
-                  <Sparkles className="h-5 w-5" />
+                  <div className="animate-spin">
+                    <Sparkles className="h-5 w-5" />
+                  </div>
                   Conjuring...
                 </>
               ) : (
@@ -80,15 +119,23 @@ export function HalloweenCostumeGenerator() {
                   {costume.adjective} {costume.character} {costume.accessory}
                 </p>
 
-                {imageUrl && (
-                  <div className="bg-gray-800 rounded-lg p-4 shadow-inner border border-purple-500/20">
+                <div className="bg-gray-800 rounded-lg p-4 shadow-inner border border-purple-500/20">
+                  {isGenerating ? (
+                    <div className="aspect-square w-full flex items-center justify-center">
+                      <Sparkles className="h-8 w-8 animate-spin text-purple-400" />
+                    </div>
+                  ) : error ? (
+                    <div className="text-red-400 p-4">
+                      Error: {error}
+                    </div>
+                  ) : imageUrl ? (
                     <img 
                       src={imageUrl}
                       alt={`${costume.adjective} ${costume.character}`}
                       className="w-full rounded-lg"
                     />
-                  </div>
-                )}
+                  ) : null}
+                </div>
               </div>
               
               <div className="text-sm text-purple-300 italic">
@@ -101,3 +148,5 @@ export function HalloweenCostumeGenerator() {
     </div>
   );
 }
+
+export default HalloweenCostumeGenerator;
